@@ -3195,6 +3195,44 @@
       </tags>
   </entry>
   <entry>
+    <title>AutoLayout指南·概述·AutoLayout Without Constraints</title>
+    <url>/2017/12/26/AutoLayout/AutoLayout%E6%8C%87%E5%8D%97%C2%B7%E6%A6%82%E8%BF%B0%C2%B7AutoLayout%20Without%20Constraints/</url>
+    <content><![CDATA[<h1 id="AutoLayout指南·概述"><a href="#AutoLayout指南·概述" class="headerlink" title="AutoLayout指南·概述"></a>AutoLayout指南·概述</h1><h2 id="AutoLayout-Without-Constraints"><a href="#AutoLayout-Without-Constraints" class="headerlink" title="AutoLayout Without Constraints"></a>AutoLayout Without Constraints</h2><p>Stack View 提供了一种简单的方式，可以不引入复杂的约束就能运用 AutoLayout 的特性构建用用户界面。一个 StackView 可以定义一行或者一列的用户界面元素。StackView 运用以下属性来调整这些元素。</p>
+<ul>
+<li>axis(UIStackView Only)：定义 StackView 的轴向是垂直还是水平</li>
+<li>orientation(NSStackView only)：定义 StackView 的轴向是垂直还是水平</li>
+<li>distribution：定义子 view 沿轴向的排布方式</li>
+<li>alignment：设定如何沿轴线垂直方向排布子视图</li>
+<li>spacing：设定子视图间距</li>
+</ul>
+<p>可以在 Interface Builder 中拖一个垂直或者水平的 StackView 到画布上来使用一个 StackView，然后拖出其他内容放到 Stack 中。</p>
+<p>如果一个对象自身有固有内容尺寸(intrinsic content size)，则放置到 StackView 中后仍然会保持这一尺寸。如果对象本身没有 intrinsic content size，IB 将会提供一个默认尺寸给它。你可以重新调整对象的尺寸，IB 也会添加约束来维护视图的尺寸。</p>
+<p>要进一步调整这个布局，也可以用属性检查器修改 StackView 的属性。比如下面的例子设置了 StackView 的间距为 8，distribution 为 Fills Equallly(默认使用Fill模式，自视图各自按照各自尺寸显示，Fill Equally模式的意思是让所有自视图尺寸大小相等)。</p>
+<img src="https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/Art/IB_StackView_Simple_2x.png" width=500>
+
+<p>StackView 也会基于子视图的抗拉伸属性和抗压缩属性来设置布局，你可以用尺寸检查器来修改这些属性。</p>
+<blockquote>
+<p>注意：</p>
+<p>你可以直接通过添加约束的方式来调整子视图的布局，但是要避免任何可能的约束冲突：一般来说，如果一个视图的尺寸默认返回其 Intrinsic Content Size 值，就可以安全给这一维度添加约束。更多关于约束冲突的信息查看 <a href="https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/ConflictingLayouts.html#//apple_ref/doc/uid/TP40010853-CH19-SW1" target="_blank" rel="noopener">不安全的布局</a></p>
+</blockquote>
+<p>此外，你也可以嵌套 StackView 到其他 StackView 中，构建更加复杂的布局。</p>
+<img src="https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/Art/IB_StackView_NestedStacks_2x.png" width=500>
+
+<p>总而言之，应当尽可能用 StackView 去设置你的布局，只有 StackView 无法达到你想到的效果时才应该借助创建约束的方式去实现。</p>
+<p>更多关于使用 StackView 的信息查看 <a href="https://developer.apple.com/documentation/uikit/uistackview" target="_blank" rel="noopener">UIStackView Class Reference</a> 或 <a href="https://developer.apple.com/documentation/appkit/nsstackview" target="_blank" rel="noopener">NSStackView Class Reference</a></p>
+<blockquote>
+<p>注意：</p>
+<p>尽管嵌套 StackView 的使用可以创建更复杂的用户界面，你也不能完全避免使用约束。至少你仍然会需要用约束来布局最外层 StackView 的位置或者尺寸大小。</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>AutoLayout</category>
+      </categories>
+      <tags>
+        <tag>AutoLayout</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>AutoLayout指南·AutoLayout Cookbook·intrinsic content size 视图</title>
     <url>/2017/12/26/AutoLayout/AutoLayout%E6%8C%87%E5%8D%97%C2%B7AutoLayout%20Cookbook%C2%B7intrinsic%20content%20size%20%E8%A7%86%E5%9B%BE/</url>
     <content><![CDATA[<h1 id="AutoLayout指南·AutoLayout-Cookbook"><a href="#AutoLayout指南·AutoLayout-Cookbook" class="headerlink" title="AutoLayout指南·AutoLayout Cookbook"></a>AutoLayout指南·AutoLayout Cookbook</h1><h2 id="intrinsic-content-size-视图"><a href="#intrinsic-content-size-视图" class="headerlink" title="intrinsic content size 视图"></a>intrinsic content size 视图</h2><p>接下来的示例将会使用一些有 intrinsic content size 的 view。一般来说，intrinsic content size 可以简化布局，减少所需约束的数目，但是使用 intrinsic content size 又经常需要设置 view 的 content-hugging 和 compression-resistance（CHCR）优先级，这会增加额外的复杂度。</p>
@@ -3640,44 +3678,6 @@
 <p>要记住，你需要确保对于每一种可能的 size-class 你都有可行的布局与之对应，包括所有的 size-class 基类。作为一个一般规则，选择一种布局作为你的默认布局会是一种最简单的方法。在 Any-Any size-class 下设计这种布局，然后按照需要修改 Final size-class。记住，你可以在更具体的 size-class 中添加或修改元其中的元素。</p>
 <p>要创建更复杂的布局，你可能希望在开始创建布局前绘制出 size-class 的九宫格。九宫格帮助你看到哪些约束会被多种 size-class 共享，并帮助你找到布局和 size-class 的最佳混合。</p>
 <p>查看更多使用 size-class 的信息请前往 <a href="https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/TypesofErrors.html#//apple_ref/doc/uid/TP40010853-CH22-SW1" target="_blank" rel="noopener">调试 AutoLayout</a></p>
-]]></content>
-      <categories>
-        <category>AutoLayout</category>
-      </categories>
-      <tags>
-        <tag>AutoLayout</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>AutoLayout指南·概述·AutoLayout Without Constraints</title>
-    <url>/2017/12/26/AutoLayout/AutoLayout%E6%8C%87%E5%8D%97%C2%B7%E6%A6%82%E8%BF%B0%C2%B7AutoLayout%20Without%20Constraints/</url>
-    <content><![CDATA[<h1 id="AutoLayout指南·概述"><a href="#AutoLayout指南·概述" class="headerlink" title="AutoLayout指南·概述"></a>AutoLayout指南·概述</h1><h2 id="AutoLayout-Without-Constraints"><a href="#AutoLayout-Without-Constraints" class="headerlink" title="AutoLayout Without Constraints"></a>AutoLayout Without Constraints</h2><p>Stack View 提供了一种简单的方式，可以不引入复杂的约束就能运用 AutoLayout 的特性构建用用户界面。一个 StackView 可以定义一行或者一列的用户界面元素。StackView 运用以下属性来调整这些元素。</p>
-<ul>
-<li>axis(UIStackView Only)：定义 StackView 的轴向是垂直还是水平</li>
-<li>orientation(NSStackView only)：定义 StackView 的轴向是垂直还是水平</li>
-<li>distribution：定义子 view 沿轴向的排布方式</li>
-<li>alignment：设定如何沿轴线垂直方向排布子视图</li>
-<li>spacing：设定子视图间距</li>
-</ul>
-<p>可以在 Interface Builder 中拖一个垂直或者水平的 StackView 到画布上来使用一个 StackView，然后拖出其他内容放到 Stack 中。</p>
-<p>如果一个对象自身有固有内容尺寸(intrinsic content size)，则放置到 StackView 中后仍然会保持这一尺寸。如果对象本身没有 intrinsic content size，IB 将会提供一个默认尺寸给它。你可以重新调整对象的尺寸，IB 也会添加约束来维护视图的尺寸。</p>
-<p>要进一步调整这个布局，也可以用属性检查器修改 StackView 的属性。比如下面的例子设置了 StackView 的间距为 8，distribution 为 Fills Equallly(默认使用Fill模式，自视图各自按照各自尺寸显示，Fill Equally模式的意思是让所有自视图尺寸大小相等)。</p>
-<img src="https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/Art/IB_StackView_Simple_2x.png" width=500>
-
-<p>StackView 也会基于子视图的抗拉伸属性和抗压缩属性来设置布局，你可以用尺寸检查器来修改这些属性。</p>
-<blockquote>
-<p>注意：</p>
-<p>你可以直接通过添加约束的方式来调整子视图的布局，但是要避免任何可能的约束冲突：一般来说，如果一个视图的尺寸默认返回其 Intrinsic Content Size 值，就可以安全给这一维度添加约束。更多关于约束冲突的信息查看 <a href="https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/ConflictingLayouts.html#//apple_ref/doc/uid/TP40010853-CH19-SW1" target="_blank" rel="noopener">不安全的布局</a></p>
-</blockquote>
-<p>此外，你也可以嵌套 StackView 到其他 StackView 中，构建更加复杂的布局。</p>
-<img src="https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/Art/IB_StackView_NestedStacks_2x.png" width=500>
-
-<p>总而言之，应当尽可能用 StackView 去设置你的布局，只有 StackView 无法达到你想到的效果时才应该借助创建约束的方式去实现。</p>
-<p>更多关于使用 StackView 的信息查看 <a href="https://developer.apple.com/documentation/uikit/uistackview" target="_blank" rel="noopener">UIStackView Class Reference</a> 或 <a href="https://developer.apple.com/documentation/appkit/nsstackview" target="_blank" rel="noopener">NSStackView Class Reference</a></p>
-<blockquote>
-<p>注意：</p>
-<p>尽管嵌套 StackView 的使用可以创建更复杂的用户界面，你也不能完全避免使用约束。至少你仍然会需要用约束来布局最外层 StackView 的位置或者尺寸大小。</p>
-</blockquote>
 ]]></content>
       <categories>
         <category>AutoLayout</category>
