@@ -1,9 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Swift 并发中 Task 隐式捕获 self 的问题</title>
+    <title>iOS开发/Swift 中的 some 和 any 关键字</title>
+    <url>/2023/04/25/iOS%E5%BC%80%E5%8F%91/Swift%20%E4%B8%AD%E7%9A%84%20some%20%E5%92%8C%20any%20%E5%85%B3%E9%94%AE%E5%AD%97/</url>
+    <content><![CDATA[<hr>
+<p>title: Swift 中的 some 和 any 关键字<br>date: 2023-04-26<br>category: iOS开发<br>description: “some 代表了不透明类型（opaque type），any 代表存在类型（existential type）”<br>tags:  [Swift]</p>
+<hr>
+<p>从定义出发，some 代表了不透明类型（opaque type），而 any 代表存在类型（existential type）。</p>
+<p>如果用一句概括的话，some 代表存在某个具体类型，这个具体类型遵循了某种协议的约束，并且这个具体类型是可以在编译期确定的，而 any 代表任意一种满足某种协议约束的类型，但这个类型具体是什么，必须要在运行时才能确定。</p>
+<h1 id="some-关键字"><a href="#some-关键字" class="headerlink" title="some 关键字"></a>some 关键字</h1><p>some 关键字是在 Swift 5.1 跟随 SwiftUI 的发布出现的，我们最常见到的 some 的使用如下所示</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> body: some <span class="type">View</span> &#123;</span><br><span class="line">    ···       </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>实际上在这里，some 主要起到的作用是为了减少类型定义的理解难度，body 内部可以返回任意一种 SwiftUI 定义的 View，但对外部调用者而言，其实并不关心 View 的具体类型，只要编译器确保返回值确实是 View 类型即可。因此 some View 就可以很好的表达这种 ”我不关心你是什么具体类型，只要编译器知道你的类型就可以” 的含义。</p>
+<h2 id="Self-约束"><a href="#Self-约束" class="headerlink" title="Self 约束"></a>Self 约束</h2><p>让我们看一段代码</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Food</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Meat</span>: <span class="title">Food</span> </span>&#123;</span><br><span class="line">    <span class="keyword">typealias</span> <span class="type">Unit</span> = <span class="type">Int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Vegetable</span>: <span class="title">Food</span> </span>&#123;</span><br><span class="line">    <span class="keyword">typealias</span> <span class="type">Unit</span> = <span class="type">String</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">eat</span><span class="params">(<span class="number">_</span> food: Food)</span></span> &#123;</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">let</span> m = food <span class="keyword">as</span>? <span class="type">Meat</span> &#123;</span><br><span class="line">            <span class="built_in">print</span>(m)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">let</span> v = food <span class="keyword">as</span>? <span class="type">Vegetable</span> &#123;</span><br><span class="line">            <span class="built_in">print</span>(v)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">test</span><span class="params">()</span></span> &#123;</span><br><span class="line">        eat(<span class="type">Meat</span>())</span><br><span class="line">        eat(<span class="type">Vegetable</span>())</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这段代码可以编译通过，可以看到我们的 eat 函数接受一个 “Food 类型” 的参数，并在内部将其转化成不同类型的 Food，但实际上更确切的说这里接受的应该是遵循 Food 协议的类型，由于 Food 协议并没有特殊性，所以这样的代码目前是可以通过编译的。</p>
+<p>但如果我们将 Food 修改为这样的实现</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Food</span>: <span class="title">Equatable</span> </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，我们要求 Food 遵循 Equatable 协议，Equatable 协议的定义如下</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">protocol</span> <span class="title">Equatable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="function"><span class="keyword">func</span> == <span class="params">(lhs: <span class="keyword">Self</span>, rhs: <span class="keyword">Self</span>)</span></span> -&gt; <span class="type">Bool</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>它有一个静态方法需要传入类型为 Self 的参数，类似这种类型的函数参数，我们称为 <strong>Self 约束</strong>，针对这种情况，一开始定义的 eat 函数就会报错，原因是在缺乏额外信息的情况下，我们并不能确定出 food 的具体类型，如此一来，Equatable 要求的 Self 类型也无法推断出来。</p>
+<p>可以想象一个简单的例子，如果我们在 eat 函数内部也有一个遵循 Food 类型的变量 a，那么变量 a 实际上是否能够和 food 参数判等是不能确定的，如果运行时传入的 food 和 a 的类型一样自然可以判等，但如果类型不一样就不能判等，我们就不能简单用一句 <code>a == food</code> 来实现我们的逻辑，这样 Equatable 协议就失去了它希望表达的两者可以判等的意图。</p>
+<h2 id="关联类型"><a href="#关联类型" class="headerlink" title="关联类型"></a>关联类型</h2><p>接下来我们重新定义我们的 Food 协议</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Food</span>: <span class="title">Equatable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">associatedtype</span> <span class="type">Unit</span>: <span class="type">Hashable</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们这里用到了关联类型，也就是 Unit，这样也会导致 eat 函数不能编译通过，原因和上面类似，因为有了关联类型 Unit 的存在，我们不能单纯从 Food 协议本身确定出具体类型，需要更多信息来确定。</p>
+<h2 id="反向泛型"><a href="#反向泛型" class="headerlink" title="反向泛型"></a>反向泛型</h2><p>上面两种情况我们都可以用 some 关键字来解决编译问题，也就是类似下面这样</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">eat</span><span class="params">(<span class="number">_</span> food: some Food)</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">let</span> m = food <span class="keyword">as</span>? <span class="type">Meat</span> &#123;</span><br><span class="line">        <span class="built_in">print</span>(m)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">let</span> v = food <span class="keyword">as</span>? <span class="type">Vegetable</span> &#123;</span><br><span class="line">        <span class="built_in">print</span>(v)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>它其实和用泛型约束实现是一个效果</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">eat</span>&lt;F: Food&gt;<span class="params">(<span class="number">_</span> food: F)</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">let</span> m = food <span class="keyword">as</span>? <span class="type">Meat</span> &#123;</span><br><span class="line">        <span class="built_in">print</span>(m)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">let</span> v = food <span class="keyword">as</span>? <span class="type">Vegetable</span> &#123;</span><br><span class="line">        <span class="built_in">print</span>(v)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但这两者又有所区别，让我们看看下面的代码</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">a</span><span class="params">()</span></span> -&gt; some <span class="type">Food</span> &#123;</span><br><span class="line">    <span class="type">Vegetable</span>()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">b</span>&lt;F: Food&gt;<span class="params">()</span></span> -&gt; <span class="type">F</span> &#123;</span><br><span class="line">    <span class="type">F</span>()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，函数 a 和 b 看起来实现了一样的效果，都是返回遵循 Food 协议的类型实例，但 b 函数返回的具体类型实际上取决于调用者，比如下面代码虽然都调用了 b 函数，但是返回值类型分别是 Vegetable 和 Meat。</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">let</span> vegetable: <span class="type">Vegetable</span> = b()</span><br><span class="line"><span class="keyword">let</span> meat: <span class="type">Meat</span> = b()</span><br></pre></td></tr></table></figure>
+
+<p>而 some 则不一样，无论是谁调用 a 函数，a 函数返回值类型都由 a 函数自身实现决定，在这里也就是 Vegetable 类型，这种由实现方决定具体返回类型的方式，又被称为“反向泛型”（reverse generics）。</p>
+<h2 id="用途"><a href="#用途" class="headerlink" title="用途"></a>用途</h2><p>由于 some 关键字所解决的问题实际上是一种特定问题，所以大部分开发场景我们大概不会用到 some 关键字，我在这里总结了一些可能的使用场景</p>
+<ul>
+<li>如果一个泛型参数只在一个地方使用，可以用 some 代替它以提升代码可读性，类似前面的 eat 函数</li>
+</ul>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">eat</span><span class="params">(<span class="number">_</span> food: some Food)</span></span> &#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">eat</span>&lt;F: Food&gt;<span class="params">(<span class="number">_</span> food: F)</span></span> &#123; &#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>作为模块的开发者，希望对外隐藏接口的返回值类型，例如上面所举的 a 函数</li>
+</ul>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">a</span><span class="params">()</span></span> -&gt; some <span class="type">Food</span> &#123;</span><br><span class="line">    <span class="type">Vegetable</span>()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>类型过于复杂，并且对于开发者而言没有太大意义，只需要编译器知晓类型的信息即可</li>
+</ul>
+<p>例如，在 Combine 中，多个 Operator 叠加后的 Publisher 类型会非常复杂，而开发者并不需要关心具体类型，some 关键字就可以派上用场</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">somePublisher</span><span class="params">()</span></span> -&gt; some <span class="type">Publisher</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> p1 = [[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>], [<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>]]</span><br><span class="line">        .publisher</span><br><span class="line">        .flatMap &#123; $<span class="number">0</span>.publisher &#125;</span><br><span class="line">        .<span class="built_in">map</span> &#123; $<span class="number">0</span> * <span class="number">2</span> &#125;</span><br><span class="line">    <span class="keyword">return</span> p1</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里 p1 的类型为</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="type">Publishers</span>.<span class="type">Map</span>&lt;<span class="type">Publishers</span>.<span class="type">FlatMap</span>&lt;<span class="type">Publishers</span>.<span class="type">Sequence</span>&lt;[<span class="type">Int</span>], <span class="type">Never</span>&gt;, <span class="type">Publishers</span>.<span class="type">Sequence</span>&lt;[[<span class="type">Int</span>]], <span class="type">Never</span>&gt;&gt;, <span class="type">Int</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="返回值一致性"><a href="#返回值一致性" class="headerlink" title="返回值一致性"></a>返回值一致性</h2><p>使用 some 关键字有一个需要注意的地方是，当作为返回值修饰词时，some 要求整个方法的返回值是唯一确定的类型，例如下面的代码就是不合法的。</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">makeCollection</span><span class="params">()</span></span> -&gt; some <span class="type">Collection</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="type">Int</span>.random(<span class="keyword">in</span>: <span class="number">0</span>...<span class="number">10</span>).isMultiple(of: <span class="number">2</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> [<span class="number">0</span>]</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> [<span class="string">"0"</span>]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>具体报错信息是</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">Function declares an opaque return type 'some Collection', but the return statements in its body do not have matching underlying types</span><br></pre></td></tr></table></figure>
+
+<p>因为这个函数的返回值类型可能是 Int 数组也可能是字符串数组，这样编译阶段就无法确定 makeCollection 的返回值类型，换句话说，some 表达的是存在且只存在一种确定的类型，假如希望返回不同类型的值，可以用到后面的 any 关键字。</p>
+<p>当然如果是支持泛型约束的函数，也可以用 some 关键字修饰，比如下面的代码就是合法的，这是因为泛型函数本身的类型通过泛型参数 T 是可以唯一确定的。</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">makeCollection</span>&lt;T&gt;<span class="params">()</span></span> -&gt; some <span class="type">Collection</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> [<span class="type">T</span>]()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="any-关键字"><a href="#any-关键字" class="headerlink" title="any 关键字"></a>any 关键字</h1><p>any 关键字是 Swift 5.6 引入的，any 修饰的协议类型称为存在类型，也叫做盒子类型，它表达的意思是某个对象具体的类型需要在运行时阶段确定，编译期只能模糊确定它遵循某种协议，像是一个盒子，盒子里可以装任意符合条件的具体类型，也就是”存在类型”的含义。</p>
+<p><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/0932cb8cf7174473a0bf26361335c9df~tplv-k3u1fbpfcp-zoom-in-crop-mark:4536:0:0:0.awebp?" alt=""></p>
+<p>但存在类型由于需要在运行时阶段才能确定具体类型和内存分布，因此编译器无法针对存在类型做更多有效的优化，比如泛型特化(Specialization)，以及方法调用时只能采用动态派发而不是直接静态派发的方式，所以性能上会有损耗。Swift 为了让开发者意识到使用存在类型存在的这种性能损耗，所以强制让开发者在使用存在类型时加上关键字，换句话说，any 的存在并没有在编译层面起到太多作用，更多是为了提醒开发者。</p>
+<p>这种存在类型的使用是很常见，例如下面的代码</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Food</span> </span>&#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">eat</span><span class="params">(<span class="number">_</span> food: Food)</span></span> &#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="keyword">associatedtype</span> <span class="type">Country</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">meet</span><span class="params">(<span class="number">_</span> person: Person)</span></span> &#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Unit</span>: <span class="title">Equatable</span> </span>&#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">compare</span><span class="params">(<span class="number">_</span> a: Unit, <span class="number">_</span> b: Unit)</span></span> &#123; &#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中，meet 和 compare 函数在 Swift 5.7 都会报错</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">Use of protocol 'Person' as a type must be written 'any Person'</span><br><span class="line"></span><br><span class="line">Use of protocol 'Unit' as a type must be written 'any Unit'</span><br></pre></td></tr></table></figure>
+
+<p>而 eat 函数虽然也用到了存在类型，但是 Swift 团队计划在 Swift 6 再提示编译错误。</p>
+<p>any 确实可以去除上述编译报错，但是 Swift 团队的本意其实是希望尽可能少使用 any ，或者说尽可能少使用存在类型，转而用泛型和具体类型实现相同的逻辑。</p>
+<p>我们可以将前面的代码改写为下述代码</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Food</span> </span>&#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">eat</span><span class="params">(<span class="number">_</span> food: some Food)</span></span> &#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="keyword">associatedtype</span> <span class="type">Country</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">meet</span><span class="params">(<span class="number">_</span> person: some Person)</span></span> &#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Unit</span>: <span class="title">Equatable</span> </span>&#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">compare</span>&lt;U: Unit&gt;<span class="params">(<span class="number">_</span> a: U, <span class="number">_</span> b: U)</span></span> &#123; &#125;</span><br></pre></td></tr></table></figure>
+
+<p>这会让我们的代码语义更明确，同时在编译阶段也能确定函数接受的具体类型参数。</p>
+<p>事实上，大部分场景下，any 关键字都可以用泛型、具体类型、不透明类型来代替，功能上没有什么区别，而性能上优于存在类型，目前可以想到的只能用 any 关键字的地方，是某些需要返回不同类型的场景，例如下面的代码</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">makeFood</span><span class="params">()</span></span> -&gt; any <span class="type">Food</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> ... &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="type">Meat</span>()</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="type">Vegetable</span>()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="相关链接"><a href="#相关链接" class="headerlink" title="相关链接"></a>相关链接</h1><ul>
+<li><a href="https://www.avanderlee.com/swift/some-opaque-types/" target="_blank" rel="noopener">Some keyword in Swift: Opaque types explained with code examples</a></li>
+<li><a href="https://swiftsenpai.com/swift/understanding-some-and-any/" target="_blank" rel="noopener">Understanding the “some” and “any” keywords in Swift 5.7 - Swift Senpai</a></li>
+<li><a href="https://juejin.cn/post/7119062263406788616" target="_blank" rel="noopener">【译】Understanding the “some” and “any” keywords in Swift 5.7 - 掘金</a></li>
+<li><a href="https://www.donnywals.com/what-is-the-some-keyword-in-swift/" target="_blank" rel="noopener">What is the “some” keyword in Swift? – Donny Wals</a></li>
+<li><a href="https://www.donnywals.com/what-is-the-any-keyword-in-swift/" target="_blank" rel="noopener">What is the “any” keyword in Swift? – Donny Wals</a></li>
+<li><a href="https://juejin.cn/post/7116463990724624421" target="_blank" rel="noopener">【译】What is the “any” keyword in Swift? - 掘金</a></li>
+<li><a href="https://www.donnywals.com/what-are-primary-associated-types-in-swift-5-7/" target="_blank" rel="noopener">What are primary associated types in Swift 5.7? – Donny Wals</a></li>
+<li><a href="https://github.com/apple/swift-evolution/blob/main/proposals/0346-light-weight-same-type-syntax.md" target="_blank" rel="noopener">swift-evolution/0346-light-weight-same-type-syntax.md at main · apple/swift-evolution · GitHub</a></li>
+<li><a href="https://juejin.cn/post/6993316954916257822" target="_blank" rel="noopener">【Swift-不透明类型】从SwiftUI看some关键字 - 掘金</a></li>
+</ul>
+]]></content>
+  </entry>
+  <entry>
+    <title>iOS开发/Swift 并发中 Task 隐式捕获 self 的问题</title>
     <url>/2023/04/24/iOS%E5%BC%80%E5%8F%91/Swift%20%E5%B9%B6%E5%8F%91%E4%B8%AD%20Task%20%E9%9A%90%E5%BC%8F%E6%8D%95%E8%8E%B7%20self%20%E7%9A%84%E9%97%AE%E9%A2%98/</url>
-    <content><![CDATA[<h1 id="隐式捕获"><a href="#隐式捕获" class="headerlink" title="隐式捕获"></a>隐式捕获</h1><p>Swift Concurrency 的 Task 有两个常用的初始化方法</p>
+    <content><![CDATA[<hr>
+<p>title: Swift 并发中 Task 隐式捕获 self 的问题<br>date: 2023-04-24<br>category: iOS开发<br>description: “Task 会隐式捕获 self 但没有编译提示，在大部分场景下这种特性并没有问题，但是遇到无限异步序列时容易造成循环引用问题”<br>tags:  [Swift, Swift 并发]</p>
+<hr>
+<h1 id="隐式捕获"><a href="#隐式捕获" class="headerlink" title="隐式捕获"></a>隐式捕获</h1><p>Swift Concurrency 的 Task 有两个常用的初始化方法</p>
 <figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">init</span>(priority: <span class="type">TaskPriority?</span> = <span class="literal">nil</span>, operation: @escaping @<span class="type">Sendable</span> () async -&gt; <span class="type">Success</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">func</span> <span class="title">detached</span><span class="params">(priority: TaskPriority? = <span class="literal">nil</span>, operation: @escaping @Sendable <span class="params">()</span></span></span> async -&gt; <span class="type">Success</span>) -&gt; <span class="type">Task</span>&lt;<span class="type">Success</span>, <span class="type">Failure</span>&gt;</span><br></pre></td></tr></table></figure>
 
 <p>可以看到，两个方法的 <code>operation</code> 参数都是用 @escaping 修饰的，意味着 operation 是一个逃逸闭包，逃逸闭包会在声明后延长生命周期再执行，因此如果在一个类当中使用 Task，Task 内部又调用了类的方法，就会造成对 self 的隐式捕获。</p>
@@ -61,9 +166,6 @@
 <li><a href="https://www.swiftbysundell.com/articles/memory-management-when-using-async-await/" target="_blank" rel="noopener">Memory management when using async/await in Swift | Swift by Sundell</a></li>
 </ul>
 ]]></content>
-      <categories>
-        <category>iOS开发</category>
-      </categories>
   </entry>
   <entry>
     <title>关于美的本能——《乔布斯传》</title>
@@ -3298,6 +3400,55 @@
       </tags>
   </entry>
   <entry>
+    <title>AutoLayout指南·概述·理解AutoLayout</title>
+    <url>/2017/12/26/AutoLayout/AutoLayout%E6%8C%87%E5%8D%97%C2%B7%E6%A6%82%E8%BF%B0%C2%B7%E7%90%86%E8%A7%A3AutoLayout/</url>
+    <content><![CDATA[<h1 id="AutoLayout指南·概述"><a href="#AutoLayout指南·概述" class="headerlink" title="AutoLayout指南·概述"></a>AutoLayout指南·概述</h1><p><a href="https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/index.html#//apple_ref/doc/uid/TP40010853-CH7-SW1" target="_blank" rel="noopener">原地址</a></p>
+<h2 id="理解-AutoLayout"><a href="#理解-AutoLayout" class="headerlink" title="理解 AutoLayout"></a>理解 AutoLayout</h2><p>基于设置在 view 上的约束，Auto Layout 可以动态计算视图层级中所有 view 的大小和位置。例如，你可以使一个按钮的中心与一张图片的 view 水平对齐，并使按钮的上边缘始终保持低于图像底部 8 个点。如果图片 view 的大小或位置发生了变化，按钮的位置也会自动变化从而保持约束。</p>
+<p>这种基于约束方式设计的界面允许你构建的用户界面能动态响应内部与外部的变化。</p>
+<h2 id="外部变化"><a href="#外部变化" class="headerlink" title="外部变化"></a>外部变化</h2><p>当你的 superView 的大小或形状发生变化时会引起所谓的“外部变化”，对于这些变化，你必须更新视图层级的布局从而使用好可利用的空间。这里有一些常见的外部变化的来源</p>
+<ul>
+<li>用户在 OSX 上改变了 window 的大小（OS X）</li>
+<li>用户在 iPad 上进入或离开 Split View (iOS)</li>
+<li>设备发生了旋转 (iOS)</li>
+<li>设备来电以及录音导航栏出现或者隐藏 (iOS)</li>
+<li>你希望支持不同大小的 sizeClass</li>
+<li>你希望支持不同屏幕尺寸</li>
+</ul>
+<p>大部分变化都可能在运行时发生，并需要应用做出动态的响应。即使屏幕尺寸不会发生显著的变化，创建一个适配性强的用户界面也会使你的应用同时在 4S 和 6P 上，甚至是在 iPad 上运行良好。Auto Layout 同时也是支持 iPad 的 Slide Over 和 Split View 模式的关键组件。</p>
+<h2 id="内部变化"><a href="#内部变化" class="headerlink" title="内部变化"></a>内部变化</h2><p>当应用的视图或控制器大小发生变化时，就会引起所谓的“内部变化”。这里有一些常见的内部变化发生的来源：</p>
+<ul>
+<li>展示在 app 里的内容发生了变化</li>
+<li>app 需要支持国际化</li>
+<li>app 需要支持动态字体大小(Dynamic Type)</li>
+</ul>
+<p>当应用展示的内容发生变化时，新的内容或许需要一个与旧的视图不一样的布局结构。这种情况一般发生在展示图片或文案的应用中。例如，一个新闻 app 需要调整布局来适应不同尺寸的新闻文章。或者一个照片拼图需要处理多种多样的图片尺寸与分辨率。</p>
+<p>使应用能够适应不同语言、地区和文化的过程称为国际化。国际化应用的布局必须把这些差异考虑在内，同时在这个应用所支持的所有语言与地区中，正确显示布局。</p>
+<p>国际化对于布局有三个主要的影响。首先，当我们将用户界面上的文案翻译为一个不同的语言时，字符需要不同空间来展示。例如德语相对于英语就需要比较多的空间来展示，而日语所需空间一般会少很多。</p>
+<p>其次，不同地区展示日期与数字的样式可能有所不同，即使这些地区使用同一种语言。尽管这些样式相对于语言的变化较小，用户界面依然需要适配这些微小尺寸的变化。</p>
+<p>最后，改变语言不仅仅会影响到文案的尺寸，也会影响到布局的组织结构，不同语言会使用不同的排版方向。例如英语使用从左到右的排版方向，而阿拉伯语和希伯来语则使用从右到左的排版方向。因此用户界面元素的顺序也需要进行调整以适应这种排版的不同。如果在展示英语文案的界面里有一个居于右下角的按钮，则在展示阿拉伯语文案的界面里它需要展示在左下角。</p>
+<p>最后，如果应用还支持动态字体大小，那么用户就可以改变应用中文案的字体大小了。这一特性会同时改变用户界面上所有文本组件的高度和宽度。当用户在应用运行时改变了字体大小，那么应用就必须同时改变字体和布局结构来适应这种变化。</p>
+<h3 id="自动布局与基于-Frame-的布局对比"><a href="#自动布局与基于-Frame-的布局对比" class="headerlink" title="自动布局与基于 Frame 的布局对比"></a>自动布局与基于 Frame 的布局对比</h3><p>构建用户界面有三种主要的方式。你可以用 frame 代码布局用户界面，也可以用 autoResizing 技术自动实现对外部变化的一些响应，同时也可以用 autoLayout 技术。</p>
+<p>传统的开发过程中，开发者们通过手动为视图层级中的每个 view 设置 frame 的方式，来布局他们的用户界面，frame 定义了 view 在父视图坐标系统里的位置和宽高。</p>
+<img src="https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/Art/layout_views_2x.png" width=500>
+
+<p>为了正确构建用户界面，你需要计算视图层级中每一个 view 的位置和尺寸，当界面发生变化时，需要再次计算所有受影响 view 的 frame。</p>
+<p>用代码定义一个 view 的 frame 在很多时候提供了足够的灵活性和稳定性。当变化发生时，你可以逐步设置任何你想要的变化效果。但正是由于需要自己手动处理所有变化情况，使用 frame 布局一个非常简单的界面也需要大量精力去设计、调试和维护。因此许多开发者都非常关注如何创建一个真正自适应的用户界面并有效减少复杂的布局维护工作。</p>
+<p>当然你可以使用 AutoResizing 特性来帮助缓解一些 frame 布局带来的复杂工作。一个 AutoResizing 掩码定义了当一个父视图发生变化时，子视图如何改变自身的 frame。这一特性简化了为适应外部变化而创建的布局代码。</p>
+<p>然而，autoresizing mask提供了一小部分的自动适配。对于复杂的用户界面，你通常还需要手动添加很多autoresizing mask来适配。此外，autoresizing mask只适配了外部变化，不支持内部变化。</p>
+<p>AutoLayout 利用一系列的约束来定义你的用户界面。约束表达了两个 view 之间的布局关系。AutoLayout 会基于约束来计算每一个 view 的尺寸和大小。这种布局可以动态响应内部与外部的各种变化。</p>
+<img src="https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/Art/layout_constraints_2x.png" width=500>
+
+<p>利用约束生成特定布局表现的逻辑远远不同于编写过程式代码的逻辑或是面向对象代码的逻辑。很幸运的是，掌握 AutoLayout 并不同于掌握其他的编程能力。你只需要做到两步：首先理解基于约束进行布局的背后逻辑，其次学习相应的 API。你已经在学习其他编程能力时熟练掌握了这两步，AutoLayout 在这一点上并没有什么差别。</p>
+<p>指南剩下的部分将会帮助你逐步过渡到 AutoLayout 上来。<a href="https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/AutoLayoutWithoutConstraints.html#//apple_ref/doc/uid/TP40010853-CH8-SW1" target="_blank" rel="noopener">无约束的自动布局</a> 章节将会阐述一种高水平的抽象概念来简化用户界面背后所创建的 AutoLayout。<a href="https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/AnatomyofaConstraint.html#//apple_ref/doc/uid/TP40010853-CH9-SW1" target="_blank" rel="noopener">详解约束</a> 阐述为了更好使用 AutoLayout 需要掌握的理论知识。<a href="https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/WorkingwithConstraintsinInterfaceBuidler.html#//apple_ref/doc/uid/TP40010853-CH10-SW1" target="_blank" rel="noopener">在 IB 中使用约束</a> 介绍了自动布局用到的一些工具。<a href="https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/ProgrammaticallyCreatingConstraints.html#//apple_ref/doc/uid/TP40010853-CH16-SW1" target="_blank" rel="noopener">编程实现约束</a> 和 <a href="https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/LayoutUsingStackViews.html#//apple_ref/doc/uid/TP40010853-CH3-SW1" target="_blank" rel="noopener">AutoLayout 烹饪书</a> 细致描述了 AutoLayout 的 API。最后，<a href="https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/LayoutUsingStackViews.html#//apple_ref/doc/uid/TP40010853-CH3-SW1" target="_blank" rel="noopener">AutoLayout 烹饪书</a> 陈列了一些不同复杂度下的示例布局，你可以学习并在自己的项目中使用这些示例。<a href="https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/TypesofErrors.html#//apple_ref/doc/uid/TP40010853-CH22-SW1" target="_blank" rel="noopener">AutoLayout 调试</a> 则提供了一些设备和工具用以在出错时对 AutoLayout 进行修复。</p>
+]]></content>
+      <categories>
+        <category>AutoLayout</category>
+      </categories>
+      <tags>
+        <tag>AutoLayout</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>AutoLayout指南·AutoLayout Cookbook·intrinsic content size 视图</title>
     <url>/2017/12/26/AutoLayout/AutoLayout%E6%8C%87%E5%8D%97%C2%B7AutoLayout%20Cookbook%C2%B7intrinsic%20content%20size%20%E8%A7%86%E5%9B%BE/</url>
     <content><![CDATA[<h1 id="AutoLayout指南·AutoLayout-Cookbook"><a href="#AutoLayout指南·AutoLayout-Cookbook" class="headerlink" title="AutoLayout指南·AutoLayout Cookbook"></a>AutoLayout指南·AutoLayout Cookbook</h1><h2 id="intrinsic-content-size-视图"><a href="#intrinsic-content-size-视图" class="headerlink" title="intrinsic content size 视图"></a>intrinsic content size 视图</h2><p>接下来的示例将会使用一些有 intrinsic content size 的 view。一般来说，intrinsic content size 可以简化布局，减少所需约束的数目，但是使用 intrinsic content size 又经常需要设置 view 的 content-hugging 和 compression-resistance（CHCR）优先级，这会增加额外的复杂度。</p>
@@ -3743,55 +3894,6 @@
 <p>要记住，你需要确保对于每一种可能的 size-class 你都有可行的布局与之对应，包括所有的 size-class 基类。作为一个一般规则，选择一种布局作为你的默认布局会是一种最简单的方法。在 Any-Any size-class 下设计这种布局，然后按照需要修改 Final size-class。记住，你可以在更具体的 size-class 中添加或修改元其中的元素。</p>
 <p>要创建更复杂的布局，你可能希望在开始创建布局前绘制出 size-class 的九宫格。九宫格帮助你看到哪些约束会被多种 size-class 共享，并帮助你找到布局和 size-class 的最佳混合。</p>
 <p>查看更多使用 size-class 的信息请前往 <a href="https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/TypesofErrors.html#//apple_ref/doc/uid/TP40010853-CH22-SW1" target="_blank" rel="noopener">调试 AutoLayout</a></p>
-]]></content>
-      <categories>
-        <category>AutoLayout</category>
-      </categories>
-      <tags>
-        <tag>AutoLayout</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>AutoLayout指南·概述·理解AutoLayout</title>
-    <url>/2017/12/26/AutoLayout/AutoLayout%E6%8C%87%E5%8D%97%C2%B7%E6%A6%82%E8%BF%B0%C2%B7%E7%90%86%E8%A7%A3AutoLayout/</url>
-    <content><![CDATA[<h1 id="AutoLayout指南·概述"><a href="#AutoLayout指南·概述" class="headerlink" title="AutoLayout指南·概述"></a>AutoLayout指南·概述</h1><p><a href="https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/index.html#//apple_ref/doc/uid/TP40010853-CH7-SW1" target="_blank" rel="noopener">原地址</a></p>
-<h2 id="理解-AutoLayout"><a href="#理解-AutoLayout" class="headerlink" title="理解 AutoLayout"></a>理解 AutoLayout</h2><p>基于设置在 view 上的约束，Auto Layout 可以动态计算视图层级中所有 view 的大小和位置。例如，你可以使一个按钮的中心与一张图片的 view 水平对齐，并使按钮的上边缘始终保持低于图像底部 8 个点。如果图片 view 的大小或位置发生了变化，按钮的位置也会自动变化从而保持约束。</p>
-<p>这种基于约束方式设计的界面允许你构建的用户界面能动态响应内部与外部的变化。</p>
-<h2 id="外部变化"><a href="#外部变化" class="headerlink" title="外部变化"></a>外部变化</h2><p>当你的 superView 的大小或形状发生变化时会引起所谓的“外部变化”，对于这些变化，你必须更新视图层级的布局从而使用好可利用的空间。这里有一些常见的外部变化的来源</p>
-<ul>
-<li>用户在 OSX 上改变了 window 的大小（OS X）</li>
-<li>用户在 iPad 上进入或离开 Split View (iOS)</li>
-<li>设备发生了旋转 (iOS)</li>
-<li>设备来电以及录音导航栏出现或者隐藏 (iOS)</li>
-<li>你希望支持不同大小的 sizeClass</li>
-<li>你希望支持不同屏幕尺寸</li>
-</ul>
-<p>大部分变化都可能在运行时发生，并需要应用做出动态的响应。即使屏幕尺寸不会发生显著的变化，创建一个适配性强的用户界面也会使你的应用同时在 4S 和 6P 上，甚至是在 iPad 上运行良好。Auto Layout 同时也是支持 iPad 的 Slide Over 和 Split View 模式的关键组件。</p>
-<h2 id="内部变化"><a href="#内部变化" class="headerlink" title="内部变化"></a>内部变化</h2><p>当应用的视图或控制器大小发生变化时，就会引起所谓的“内部变化”。这里有一些常见的内部变化发生的来源：</p>
-<ul>
-<li>展示在 app 里的内容发生了变化</li>
-<li>app 需要支持国际化</li>
-<li>app 需要支持动态字体大小(Dynamic Type)</li>
-</ul>
-<p>当应用展示的内容发生变化时，新的内容或许需要一个与旧的视图不一样的布局结构。这种情况一般发生在展示图片或文案的应用中。例如，一个新闻 app 需要调整布局来适应不同尺寸的新闻文章。或者一个照片拼图需要处理多种多样的图片尺寸与分辨率。</p>
-<p>使应用能够适应不同语言、地区和文化的过程称为国际化。国际化应用的布局必须把这些差异考虑在内，同时在这个应用所支持的所有语言与地区中，正确显示布局。</p>
-<p>国际化对于布局有三个主要的影响。首先，当我们将用户界面上的文案翻译为一个不同的语言时，字符需要不同空间来展示。例如德语相对于英语就需要比较多的空间来展示，而日语所需空间一般会少很多。</p>
-<p>其次，不同地区展示日期与数字的样式可能有所不同，即使这些地区使用同一种语言。尽管这些样式相对于语言的变化较小，用户界面依然需要适配这些微小尺寸的变化。</p>
-<p>最后，改变语言不仅仅会影响到文案的尺寸，也会影响到布局的组织结构，不同语言会使用不同的排版方向。例如英语使用从左到右的排版方向，而阿拉伯语和希伯来语则使用从右到左的排版方向。因此用户界面元素的顺序也需要进行调整以适应这种排版的不同。如果在展示英语文案的界面里有一个居于右下角的按钮，则在展示阿拉伯语文案的界面里它需要展示在左下角。</p>
-<p>最后，如果应用还支持动态字体大小，那么用户就可以改变应用中文案的字体大小了。这一特性会同时改变用户界面上所有文本组件的高度和宽度。当用户在应用运行时改变了字体大小，那么应用就必须同时改变字体和布局结构来适应这种变化。</p>
-<h3 id="自动布局与基于-Frame-的布局对比"><a href="#自动布局与基于-Frame-的布局对比" class="headerlink" title="自动布局与基于 Frame 的布局对比"></a>自动布局与基于 Frame 的布局对比</h3><p>构建用户界面有三种主要的方式。你可以用 frame 代码布局用户界面，也可以用 autoResizing 技术自动实现对外部变化的一些响应，同时也可以用 autoLayout 技术。</p>
-<p>传统的开发过程中，开发者们通过手动为视图层级中的每个 view 设置 frame 的方式，来布局他们的用户界面，frame 定义了 view 在父视图坐标系统里的位置和宽高。</p>
-<img src="https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/Art/layout_views_2x.png" width=500>
-
-<p>为了正确构建用户界面，你需要计算视图层级中每一个 view 的位置和尺寸，当界面发生变化时，需要再次计算所有受影响 view 的 frame。</p>
-<p>用代码定义一个 view 的 frame 在很多时候提供了足够的灵活性和稳定性。当变化发生时，你可以逐步设置任何你想要的变化效果。但正是由于需要自己手动处理所有变化情况，使用 frame 布局一个非常简单的界面也需要大量精力去设计、调试和维护。因此许多开发者都非常关注如何创建一个真正自适应的用户界面并有效减少复杂的布局维护工作。</p>
-<p>当然你可以使用 AutoResizing 特性来帮助缓解一些 frame 布局带来的复杂工作。一个 AutoResizing 掩码定义了当一个父视图发生变化时，子视图如何改变自身的 frame。这一特性简化了为适应外部变化而创建的布局代码。</p>
-<p>然而，autoresizing mask提供了一小部分的自动适配。对于复杂的用户界面，你通常还需要手动添加很多autoresizing mask来适配。此外，autoresizing mask只适配了外部变化，不支持内部变化。</p>
-<p>AutoLayout 利用一系列的约束来定义你的用户界面。约束表达了两个 view 之间的布局关系。AutoLayout 会基于约束来计算每一个 view 的尺寸和大小。这种布局可以动态响应内部与外部的各种变化。</p>
-<img src="https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/Art/layout_constraints_2x.png" width=500>
-
-<p>利用约束生成特定布局表现的逻辑远远不同于编写过程式代码的逻辑或是面向对象代码的逻辑。很幸运的是，掌握 AutoLayout 并不同于掌握其他的编程能力。你只需要做到两步：首先理解基于约束进行布局的背后逻辑，其次学习相应的 API。你已经在学习其他编程能力时熟练掌握了这两步，AutoLayout 在这一点上并没有什么差别。</p>
-<p>指南剩下的部分将会帮助你逐步过渡到 AutoLayout 上来。<a href="https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/AutoLayoutWithoutConstraints.html#//apple_ref/doc/uid/TP40010853-CH8-SW1" target="_blank" rel="noopener">无约束的自动布局</a> 章节将会阐述一种高水平的抽象概念来简化用户界面背后所创建的 AutoLayout。<a href="https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/AnatomyofaConstraint.html#//apple_ref/doc/uid/TP40010853-CH9-SW1" target="_blank" rel="noopener">详解约束</a> 阐述为了更好使用 AutoLayout 需要掌握的理论知识。<a href="https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/WorkingwithConstraintsinInterfaceBuidler.html#//apple_ref/doc/uid/TP40010853-CH10-SW1" target="_blank" rel="noopener">在 IB 中使用约束</a> 介绍了自动布局用到的一些工具。<a href="https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/ProgrammaticallyCreatingConstraints.html#//apple_ref/doc/uid/TP40010853-CH16-SW1" target="_blank" rel="noopener">编程实现约束</a> 和 <a href="https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/LayoutUsingStackViews.html#//apple_ref/doc/uid/TP40010853-CH3-SW1" target="_blank" rel="noopener">AutoLayout 烹饪书</a> 细致描述了 AutoLayout 的 API。最后，<a href="https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/LayoutUsingStackViews.html#//apple_ref/doc/uid/TP40010853-CH3-SW1" target="_blank" rel="noopener">AutoLayout 烹饪书</a> 陈列了一些不同复杂度下的示例布局，你可以学习并在自己的项目中使用这些示例。<a href="https://developer.apple.com/library/content/documentation/UserExperience/Conceptual/AutolayoutPG/TypesofErrors.html#//apple_ref/doc/uid/TP40010853-CH22-SW1" target="_blank" rel="noopener">AutoLayout 调试</a> 则提供了一些设备和工具用以在出错时对 AutoLayout 进行修复。</p>
 ]]></content>
       <categories>
         <category>AutoLayout</category>
