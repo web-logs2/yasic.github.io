@@ -141,7 +141,7 @@
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">15</span></a>
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">16</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
@@ -207,7 +207,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2023/04/25/iOS%E5%BC%80%E5%8F%91/Swift%20%E4%B8%AD%E7%9A%84%20some%20%E5%92%8C%20any%20%E5%85%B3%E9%94%AE%E5%AD%97/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2023/04/26/iOS%E5%BC%80%E5%8F%91/Swift%20%E4%B8%AD%E7%9A%84%20some%20%E5%92%8C%20any%20%E5%85%B3%E9%94%AE%E5%AD%97/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.png">
@@ -221,7 +221,7 @@
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
           
-            <a href="/2023/04/25/iOS%E5%BC%80%E5%8F%91/Swift%20%E4%B8%AD%E7%9A%84%20some%20%E5%92%8C%20any%20%E5%85%B3%E9%94%AE%E5%AD%97/" class="post-title-link" itemprop="url">iOS开发/Swift 中的 some 和 any 关键字</a>
+            <a href="/2023/04/26/iOS%E5%BC%80%E5%8F%91/Swift%20%E4%B8%AD%E7%9A%84%20some%20%E5%92%8C%20any%20%E5%85%B3%E9%94%AE%E5%AD%97/" class="post-title-link" itemprop="url">Swift 中的 some 和 any 关键字</a>
         </h1>
 
         <div class="post-meta">
@@ -231,7 +231,18 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2023-04-25 22:04:09" itemprop="dateCreated datePublished" datetime="2023-04-25T22:04:09+08:00">2023-04-25</time>
+              <time title="创建时间：2023-04-26 00:00:00" itemprop="dateCreated datePublished" datetime="2023-04-26T00:00:00+08:00">2023-04-26</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS%E5%BC%80%E5%8F%91/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS开发</span>
+                  </a>
+                </span>
             </span>
 
           
@@ -245,104 +256,15 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <hr>
-<p>title: Swift 中的 some 和 any 关键字<br>date: 2023-04-26<br>category: iOS开发<br>description: “some 代表了不透明类型（opaque type），any 代表存在类型（existential type）”<br>tags:  [Swift]</p>
-<hr>
-<p>从定义出发，some 代表了不透明类型（opaque type），而 any 代表存在类型（existential type）。</p>
-<p>如果用一句概括的话，some 代表存在某个具体类型，这个具体类型遵循了某种协议的约束，并且这个具体类型是可以在编译期确定的，而 any 代表任意一种满足某种协议约束的类型，但这个类型具体是什么，必须要在运行时才能确定。</p>
-<h1 id="some-关键字"><a href="#some-关键字" class="headerlink" title="some 关键字"></a>some 关键字</h1><p>some 关键字是在 Swift 5.1 跟随 SwiftUI 的发布出现的，我们最常见到的 some 的使用如下所示</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> body: some <span class="type">View</span> &#123;</span><br><span class="line">    ···       </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>实际上在这里，some 主要起到的作用是为了减少类型定义的理解难度，body 内部可以返回任意一种 SwiftUI 定义的 View，但对外部调用者而言，其实并不关心 View 的具体类型，只要编译器确保返回值确实是 View 类型即可。因此 some View 就可以很好的表达这种 ”我不关心你是什么具体类型，只要编译器知道你的类型就可以” 的含义。</p>
-<h2 id="Self-约束"><a href="#Self-约束" class="headerlink" title="Self 约束"></a>Self 约束</h2><p>让我们看一段代码</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Food</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Meat</span>: <span class="title">Food</span> </span>&#123;</span><br><span class="line">    <span class="keyword">typealias</span> <span class="type">Unit</span> = <span class="type">Int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Vegetable</span>: <span class="title">Food</span> </span>&#123;</span><br><span class="line">    <span class="keyword">typealias</span> <span class="type">Unit</span> = <span class="type">String</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">eat</span><span class="params">(<span class="number">_</span> food: Food)</span></span> &#123;</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">let</span> m = food <span class="keyword">as</span>? <span class="type">Meat</span> &#123;</span><br><span class="line">            <span class="built_in">print</span>(m)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">let</span> v = food <span class="keyword">as</span>? <span class="type">Vegetable</span> &#123;</span><br><span class="line">            <span class="built_in">print</span>(v)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">test</span><span class="params">()</span></span> &#123;</span><br><span class="line">        eat(<span class="type">Meat</span>())</span><br><span class="line">        eat(<span class="type">Vegetable</span>())</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这段代码可以编译通过，可以看到我们的 eat 函数接受一个 “Food 类型” 的参数，并在内部将其转化成不同类型的 Food，但实际上更确切的说这里接受的应该是遵循 Food 协议的类型，由于 Food 协议并没有特殊性，所以这样的代码目前是可以通过编译的。</p>
-<p>但如果我们将 Food 修改为这样的实现</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Food</span>: <span class="title">Equatable</span> </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>可以看到，我们要求 Food 遵循 Equatable 协议，Equatable 协议的定义如下</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">protocol</span> <span class="title">Equatable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="function"><span class="keyword">func</span> == <span class="params">(lhs: <span class="keyword">Self</span>, rhs: <span class="keyword">Self</span>)</span></span> -&gt; <span class="type">Bool</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>它有一个静态方法需要传入类型为 Self 的参数，类似这种类型的函数参数，我们称为 <strong>Self 约束</strong>，针对这种情况，一开始定义的 eat 函数就会报错，原因是在缺乏额外信息的情况下，我们并不能确定出 food 的具体类型，如此一来，Equatable 要求的 Self 类型也无法推断出来。</p>
-<p>可以想象一个简单的例子，如果我们在 eat 函数内部也有一个遵循 Food 类型的变量 a，那么变量 a 实际上是否能够和 food 参数判等是不能确定的，如果运行时传入的 food 和 a 的类型一样自然可以判等，但如果类型不一样就不能判等，我们就不能简单用一句 <code>a == food</code> 来实现我们的逻辑，这样 Equatable 协议就失去了它希望表达的两者可以判等的意图。</p>
-<h2 id="关联类型"><a href="#关联类型" class="headerlink" title="关联类型"></a>关联类型</h2><p>接下来我们重新定义我们的 Food 协议</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Food</span>: <span class="title">Equatable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">associatedtype</span> <span class="type">Unit</span>: <span class="type">Hashable</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们这里用到了关联类型，也就是 Unit，这样也会导致 eat 函数不能编译通过，原因和上面类似，因为有了关联类型 Unit 的存在，我们不能单纯从 Food 协议本身确定出具体类型，需要更多信息来确定。</p>
-<h2 id="反向泛型"><a href="#反向泛型" class="headerlink" title="反向泛型"></a>反向泛型</h2><p>上面两种情况我们都可以用 some 关键字来解决编译问题，也就是类似下面这样</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">eat</span><span class="params">(<span class="number">_</span> food: some Food)</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">let</span> m = food <span class="keyword">as</span>? <span class="type">Meat</span> &#123;</span><br><span class="line">        <span class="built_in">print</span>(m)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">let</span> v = food <span class="keyword">as</span>? <span class="type">Vegetable</span> &#123;</span><br><span class="line">        <span class="built_in">print</span>(v)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>它其实和用泛型约束实现是一个效果</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">eat</span>&lt;F: Food&gt;<span class="params">(<span class="number">_</span> food: F)</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">let</span> m = food <span class="keyword">as</span>? <span class="type">Meat</span> &#123;</span><br><span class="line">        <span class="built_in">print</span>(m)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">let</span> v = food <span class="keyword">as</span>? <span class="type">Vegetable</span> &#123;</span><br><span class="line">        <span class="built_in">print</span>(v)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>但这两者又有所区别，让我们看看下面的代码</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">a</span><span class="params">()</span></span> -&gt; some <span class="type">Food</span> &#123;</span><br><span class="line">    <span class="type">Vegetable</span>()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">b</span>&lt;F: Food&gt;<span class="params">()</span></span> -&gt; <span class="type">F</span> &#123;</span><br><span class="line">    <span class="type">F</span>()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>可以看到，函数 a 和 b 看起来实现了一样的效果，都是返回遵循 Food 协议的类型实例，但 b 函数返回的具体类型实际上取决于调用者，比如下面代码虽然都调用了 b 函数，但是返回值类型分别是 Vegetable 和 Meat。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> vegetable: <span class="type">Vegetable</span> = b()</span><br><span class="line"><span class="keyword">let</span> meat: <span class="type">Meat</span> = b()</span><br></pre></td></tr></table></figure>
-
-<p>而 some 则不一样，无论是谁调用 a 函数，a 函数返回值类型都由 a 函数自身实现决定，在这里也就是 Vegetable 类型，这种由实现方决定具体返回类型的方式，又被称为“反向泛型”（reverse generics）。</p>
-<h2 id="用途"><a href="#用途" class="headerlink" title="用途"></a>用途</h2><p>由于 some 关键字所解决的问题实际上是一种特定问题，所以大部分开发场景我们大概不会用到 some 关键字，我在这里总结了一些可能的使用场景</p>
-<ul>
-<li>如果一个泛型参数只在一个地方使用，可以用 some 代替它以提升代码可读性，类似前面的 eat 函数</li>
-</ul>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">eat</span><span class="params">(<span class="number">_</span> food: some Food)</span></span> &#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">eat</span>&lt;F: Food&gt;<span class="params">(<span class="number">_</span> food: F)</span></span> &#123; &#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>作为模块的开发者，希望对外隐藏接口的返回值类型，例如上面所举的 a 函数</li>
-</ul>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">a</span><span class="params">()</span></span> -&gt; some <span class="type">Food</span> &#123;</span><br><span class="line">    <span class="type">Vegetable</span>()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>类型过于复杂，并且对于开发者而言没有太大意义，只需要编译器知晓类型的信息即可</li>
-</ul>
-<p>例如，在 Combine 中，多个 Operator 叠加后的 Publisher 类型会非常复杂，而开发者并不需要关心具体类型，some 关键字就可以派上用场</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">somePublisher</span><span class="params">()</span></span> -&gt; some <span class="type">Publisher</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> p1 = [[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>], [<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>]]</span><br><span class="line">        .publisher</span><br><span class="line">        .flatMap &#123; $<span class="number">0</span>.publisher &#125;</span><br><span class="line">        .<span class="built_in">map</span> &#123; $<span class="number">0</span> * <span class="number">2</span> &#125;</span><br><span class="line">    <span class="keyword">return</span> p1</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这里 p1 的类型为</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Publishers</span>.<span class="type">Map</span>&lt;<span class="type">Publishers</span>.<span class="type">FlatMap</span>&lt;<span class="type">Publishers</span>.<span class="type">Sequence</span>&lt;[<span class="type">Int</span>], <span class="type">Never</span>&gt;, <span class="type">Publishers</span>.<span class="type">Sequence</span>&lt;[[<span class="type">Int</span>]], <span class="type">Never</span>&gt;&gt;, <span class="type">Int</span>&gt;</span><br></pre></td></tr></table></figure>
-
-<h2 id="返回值一致性"><a href="#返回值一致性" class="headerlink" title="返回值一致性"></a>返回值一致性</h2><p>使用 some 关键字有一个需要注意的地方是，当作为返回值修饰词时，some 要求整个方法的返回值是唯一确定的类型，例如下面的代码就是不合法的。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">makeCollection</span><span class="params">()</span></span> -&gt; some <span class="type">Collection</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="type">Int</span>.random(<span class="keyword">in</span>: <span class="number">0</span>...<span class="number">10</span>).isMultiple(of: <span class="number">2</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> [<span class="number">0</span>]</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> [<span class="string">"0"</span>]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>具体报错信息是</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Function declares an opaque return type 'some Collection', but the return statements in its body do not have matching underlying types</span><br></pre></td></tr></table></figure>
-
-<p>因为这个函数的返回值类型可能是 Int 数组也可能是字符串数组，这样编译阶段就无法确定 makeCollection 的返回值类型，换句话说，some 表达的是存在且只存在一种确定的类型，假如希望返回不同类型的值，可以用到后面的 any 关键字。</p>
-<p>当然如果是支持泛型约束的函数，也可以用 some 关键字修饰，比如下面的代码就是合法的，这是因为泛型函数本身的类型通过泛型参数 T 是可以唯一确定的。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">makeCollection</span>&lt;T&gt;<span class="params">()</span></span> -&gt; some <span class="type">Collection</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> [<span class="type">T</span>]()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="any-关键字"><a href="#any-关键字" class="headerlink" title="any 关键字"></a>any 关键字</h1><p>any 关键字是 Swift 5.6 引入的，any 修饰的协议类型称为存在类型，也叫做盒子类型，它表达的意思是某个对象具体的类型需要在运行时阶段确定，编译期只能模糊确定它遵循某种协议，像是一个盒子，盒子里可以装任意符合条件的具体类型，也就是”存在类型”的含义。</p>
-<p><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/0932cb8cf7174473a0bf26361335c9df~tplv-k3u1fbpfcp-zoom-in-crop-mark:4536:0:0:0.awebp?" alt=""></p>
-<p>但存在类型由于需要在运行时阶段才能确定具体类型和内存分布，因此编译器无法针对存在类型做更多有效的优化，比如泛型特化(Specialization)，以及方法调用时只能采用动态派发而不是直接静态派发的方式，所以性能上会有损耗。Swift 为了让开发者意识到使用存在类型存在的这种性能损耗，所以强制让开发者在使用存在类型时加上关键字，换句话说，any 的存在并没有在编译层面起到太多作用，更多是为了提醒开发者。</p>
-<p>这种存在类型的使用是很常见，例如下面的代码</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Food</span> </span>&#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">eat</span><span class="params">(<span class="number">_</span> food: Food)</span></span> &#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="keyword">associatedtype</span> <span class="type">Country</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">meet</span><span class="params">(<span class="number">_</span> person: Person)</span></span> &#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Unit</span>: <span class="title">Equatable</span> </span>&#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">compare</span><span class="params">(<span class="number">_</span> a: Unit, <span class="number">_</span> b: Unit)</span></span> &#123; &#125;</span><br></pre></td></tr></table></figure>
-
-<p>其中，meet 和 compare 函数在 Swift 5.7 都会报错</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Use of protocol 'Person' as a type must be written 'any Person'</span><br><span class="line"></span><br><span class="line">Use of protocol 'Unit' as a type must be written 'any Unit'</span><br></pre></td></tr></table></figure>
-
-<p>而 eat 函数虽然也用到了存在类型，但是 Swift 团队计划在 Swift 6 再提示编译错误。</p>
-<p>any 确实可以去除上述编译报错，但是 Swift 团队的本意其实是希望尽可能少使用 any ，或者说尽可能少使用存在类型，转而用泛型和具体类型实现相同的逻辑。</p>
-<p>我们可以将前面的代码改写为下述代码</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Food</span> </span>&#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">eat</span><span class="params">(<span class="number">_</span> food: some Food)</span></span> &#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="keyword">associatedtype</span> <span class="type">Country</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">meet</span><span class="params">(<span class="number">_</span> person: some Person)</span></span> &#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">Unit</span>: <span class="title">Equatable</span> </span>&#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">compare</span>&lt;U: Unit&gt;<span class="params">(<span class="number">_</span> a: U, <span class="number">_</span> b: U)</span></span> &#123; &#125;</span><br></pre></td></tr></table></figure>
-
-<p>这会让我们的代码语义更明确，同时在编译阶段也能确定函数接受的具体类型参数。</p>
-<p>事实上，大部分场景下，any 关键字都可以用泛型、具体类型、不透明类型来代替，功能上没有什么区别，而性能上优于存在类型，目前可以想到的只能用 any 关键字的地方，是某些需要返回不同类型的场景，例如下面的代码</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">makeFood</span><span class="params">()</span></span> -&gt; any <span class="type">Food</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> ... &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="type">Meat</span>()</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="type">Vegetable</span>()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="相关链接"><a href="#相关链接" class="headerlink" title="相关链接"></a>相关链接</h1><ul>
-<li><a href="https://www.avanderlee.com/swift/some-opaque-types/" target="_blank" rel="noopener">Some keyword in Swift: Opaque types explained with code examples</a></li>
-<li><a href="https://swiftsenpai.com/swift/understanding-some-and-any/" target="_blank" rel="noopener">Understanding the “some” and “any” keywords in Swift 5.7 - Swift Senpai</a></li>
-<li><a href="https://juejin.cn/post/7119062263406788616" target="_blank" rel="noopener">【译】Understanding the “some” and “any” keywords in Swift 5.7 - 掘金</a></li>
-<li><a href="https://www.donnywals.com/what-is-the-some-keyword-in-swift/" target="_blank" rel="noopener">What is the “some” keyword in Swift? – Donny Wals</a></li>
-<li><a href="https://www.donnywals.com/what-is-the-any-keyword-in-swift/" target="_blank" rel="noopener">What is the “any” keyword in Swift? – Donny Wals</a></li>
-<li><a href="https://juejin.cn/post/7116463990724624421" target="_blank" rel="noopener">【译】What is the “any” keyword in Swift? - 掘金</a></li>
-<li><a href="https://www.donnywals.com/what-are-primary-associated-types-in-swift-5-7/" target="_blank" rel="noopener">What are primary associated types in Swift 5.7? – Donny Wals</a></li>
-<li><a href="https://github.com/apple/swift-evolution/blob/main/proposals/0346-light-weight-same-type-syntax.md" target="_blank" rel="noopener">swift-evolution/0346-light-weight-same-type-syntax.md at main · apple/swift-evolution · GitHub</a></li>
-<li><a href="https://juejin.cn/post/6993316954916257822" target="_blank" rel="noopener">【Swift-不透明类型】从SwiftUI看some关键字 - 掘金</a></li>
-</ul>
-
+          <p>some 代表了不透明类型（opaque type），any 代表存在类型（existential type）</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2023/04/26/iOS%E5%BC%80%E5%8F%91/Swift%20%E4%B8%AD%E7%9A%84%20some%20%E5%92%8C%20any%20%E5%85%B3%E9%94%AE%E5%AD%97/">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -375,7 +297,7 @@
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
           
-            <a href="/2023/04/24/iOS%E5%BC%80%E5%8F%91/Swift%20%E5%B9%B6%E5%8F%91%E4%B8%AD%20Task%20%E9%9A%90%E5%BC%8F%E6%8D%95%E8%8E%B7%20self%20%E7%9A%84%E9%97%AE%E9%A2%98/" class="post-title-link" itemprop="url">iOS开发/Swift 并发中 Task 隐式捕获 self 的问题</a>
+            <a href="/2023/04/24/iOS%E5%BC%80%E5%8F%91/Swift%20%E5%B9%B6%E5%8F%91%E4%B8%AD%20Task%20%E9%9A%90%E5%BC%8F%E6%8D%95%E8%8E%B7%20self%20%E7%9A%84%E9%97%AE%E9%A2%98/" class="post-title-link" itemprop="url">Swift 并发中 Task 隐式捕获 self 的问题</a>
         </h1>
 
         <div class="post-meta">
@@ -385,7 +307,18 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2023-04-24 10:20:46" itemprop="dateCreated datePublished" datetime="2023-04-24T10:20:46+08:00">2023-04-24</time>
+              <time title="创建时间：2023-04-24 00:00:00" itemprop="dateCreated datePublished" datetime="2023-04-24T00:00:00+08:00">2023-04-24</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS%E5%BC%80%E5%8F%91/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS开发</span>
+                  </a>
+                </span>
             </span>
 
           
@@ -399,67 +332,15 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <hr>
-<p>title: Swift 并发中 Task 隐式捕获 self 的问题<br>date: 2023-04-24<br>category: iOS开发<br>description: “Task 会隐式捕获 self 但没有编译提示，在大部分场景下这种特性并没有问题，但是遇到无限异步序列时容易造成循环引用问题”<br>tags:  [Swift, Swift 并发]</p>
-<hr>
-<h1 id="隐式捕获"><a href="#隐式捕获" class="headerlink" title="隐式捕获"></a>隐式捕获</h1><p>Swift Concurrency 的 Task 有两个常用的初始化方法</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">init</span>(priority: <span class="type">TaskPriority?</span> = <span class="literal">nil</span>, operation: @escaping @<span class="type">Sendable</span> () async -&gt; <span class="type">Success</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">func</span> <span class="title">detached</span><span class="params">(priority: TaskPriority? = <span class="literal">nil</span>, operation: @escaping @Sendable <span class="params">()</span></span></span> async -&gt; <span class="type">Success</span>) -&gt; <span class="type">Task</span>&lt;<span class="type">Success</span>, <span class="type">Failure</span>&gt;</span><br></pre></td></tr></table></figure>
-
-<p>可以看到，两个方法的 <code>operation</code> 参数都是用 @escaping 修饰的，意味着 operation 是一个逃逸闭包，逃逸闭包会在声明后延长生命周期再执行，因此如果在一个类当中使用 Task，Task 内部又调用了类的方法，就会造成对 self 的隐式捕获。</p>
-<p>这种 self 的隐式捕获是一个很常见的问题，例如下面的代码</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TestView</span>: <span class="title">UIView</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">test</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="type">DispatchQueue</span>.main.async &#123;</span><br><span class="line">            handle()</span><br><span class="line">        &#125;</span><br><span class="line">	  &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">handle</span><span class="params">()</span></span> &#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这里我们用到了 GCD 调用 handle 方法，如果直接这样写就会触发 Xcode 的编译错误</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Call to method 'handle' in closure requires explicit use of 'self' to make capture semantics explicit</span><br></pre></td></tr></table></figure>
-
-<p>这是因为 Xcode 希望开发者通过显式调用 self.handle 的方式，提醒开发者这里发生了隐式捕获。需要注意的是，隐式捕获并不一定会造成内存泄漏，例如在这里，隐式捕获仅仅会因为捕获 self，导致 self 的生命周期延长到了下一个 runloop，一旦 GCD 执行结束，self 就可以正常释放，所以这里可以简单改为</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TestView</span>: <span class="title">UIView</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">test</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="type">DispatchQueue</span>.main.async &#123;</span><br><span class="line">            <span class="keyword">self</span>.handle()</span><br><span class="line">        &#125;</span><br><span class="line">	  &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">handle</span><span class="params">()</span></span> &#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>但是在 Task 这里，情况有些不同，对于下面的代码，Xcode 是不会有任何提示的。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TestView</span>: <span class="title">UIView</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">test</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="type">Task</span> &#123;</span><br><span class="line">            handle()</span><br><span class="line">        &#125;</span><br><span class="line">	  &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">handle</span><span class="params">()</span></span> &#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这是因为前面提到的 Task 的两个初始化方法，在源码内部实际上会用 <code>_implicitSelfCapture</code> 关键词修饰 operation，<code>_implicitSelfCapture</code> 关键词可以让被修饰的 block 捕获 self 而不会触发显式捕获的错误，因为 <a href="https://github.com/apple/swift-evolution/blob/main/proposals/0304-structured-concurrency.md#implicit-self" target="_blank" rel="noopener">Swift Concurrency 的设计者认为</a>，显式捕获 self 的意图是为了发现隐藏的循环引用，而 Task 的闭包会被 <strong>立即执行</strong>，所以看起来并不需要传递这种意图。</p>
-<blockquote>
-<p>The intent behind requiring self. when capturing self in an escaping closure is to warn the developer about potential reference cycles. The closure passed to Task is executed immediately, and the only reference to self is what occurs in the body. Therefore, the explicit self. isn’t communicating useful information and should not be required.  </p>
-</blockquote>
-<h1 id="隐式捕获的问题"><a href="#隐式捕获的问题" class="headerlink" title="隐式捕获的问题"></a>隐式捕获的问题</h1><p>看起来确实是这样，Task 通常情况下，包括在前面提到的场景下，都是会立即执行并结束的，它最多可能只会延长 self 的生命周期，并不会发生循环引用。</p>
-<p>但在一些特殊情况下，这种预想就失效了，比如如果遇到了无限的异步序列 (AsyncSequence)。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TestView</span>: <span class="title">UIView</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">test</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="type">Task</span> &#123;</span><br><span class="line">            <span class="keyword">let</span> notifications = <span class="type">NotificationCenter</span>.<span class="keyword">default</span>.notifications(named: <span class="type">UIApplication</span>.didEnterBackgroundNotification)</span><br><span class="line">            <span class="keyword">for</span> await notification <span class="keyword">in</span> notifications &#123;</span><br><span class="line">                <span class="built_in">print</span>(notification)</span><br><span class="line">                handle()</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">	  &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">handle</span><span class="params">()</span></span> &#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这里 Task 内部的 operation 监听了应用进入后台的通知，并通过 for await 对  notifications 异步序列进行了监听，也没有增加监听停止的条件，这样的代码就会造成 self 无法被释放。进一步分析会发现，这里真正捕获 self 的并不是 <strong>最外层的 Task</strong>，之所以这样说是因为如果我们将代码改为下面的形式，内存泄漏依然存在。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TestView</span>: <span class="title">UIView</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">test</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="type">Task</span> &#123; [<span class="keyword">weak</span> <span class="keyword">self</span>] <span class="keyword">in</span></span><br><span class="line">            await <span class="keyword">self</span>?.observeAppEnterBackground()</span><br><span class="line">        &#125;</span><br><span class="line">	  &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">handle</span><span class="params">()</span></span> &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">observeAppEnterBackground</span><span class="params">()</span></span> async &#123;</span><br><span class="line">        <span class="keyword">let</span> notifications = <span class="type">NotificationCenter</span>.<span class="keyword">default</span>.notifications(named: <span class="type">UIApplication</span>.didEnterBackgroundNotification)</span><br><span class="line">        <span class="keyword">for</span> await notification <span class="keyword">in</span> notifications &#123;</span><br><span class="line">            <span class="built_in">print</span>(notification)</span><br><span class="line">            handle()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>可以看出，在初始化 Task 时，我们通过捕获列表已经将 self 弱引用捕获了，但是执行代码后， TestView 仍然无法释放。</p>
-<p>实际上真正引发泄漏的是下面的代码，我们通过 for await 遍历无限异步序列 notifications，相当于代码陷入了死循环，而每一次 await 操作又会隐式捕获 self，造成了 self 无法被释放，可以简单认为，每一次 await 操作都会隐式生成一个新的 Task，而新的 Task 又会捕获 self，这才是造成循环引用的原因。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> await notification <span class="keyword">in</span> notifications &#123;</span><br><span class="line">    <span class="built_in">print</span>(notification)</span><br><span class="line">    handle()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="如何解决"><a href="#如何解决" class="headerlink" title="如何解决"></a>如何解决</h1><h2 id="弱捕获-self"><a href="#弱捕获-self" class="headerlink" title="弱捕获 self"></a>弱捕获 self</h2><p>既然明确了在监听无限序列时因为捕获 self 导致了循环引用，解决思路也就有了，最传统的方式就是类似 GCD 和闭包引用一样，我们通过捕获列表将 self 引用变为弱引用，从而避免 Task 持有 self。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TestView</span>: <span class="title">UIView</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">test</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="type">Task</span> &#123; [<span class="keyword">weak</span> <span class="keyword">self</span>] <span class="keyword">in</span></span><br><span class="line">            <span class="keyword">let</span> notifications = <span class="type">NotificationCenter</span>.<span class="keyword">default</span>.notifications(named: <span class="type">UIApplication</span>.didEnterBackgroundNotification)</span><br><span class="line">            <span class="keyword">for</span> await notification <span class="keyword">in</span> notifications &#123;</span><br><span class="line">                <span class="keyword">guard</span> <span class="keyword">let</span> <span class="keyword">self</span> = <span class="keyword">self</span> <span class="keyword">else</span> &#123; <span class="keyword">return</span> &#125;</span><br><span class="line">                <span class="built_in">print</span>(notification)</span><br><span class="line">                <span class="keyword">self</span>.handle()</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">	  &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">handle</span><span class="params">()</span></span> &#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>需要注意的是，由于真正发生捕获行为的地方是在 for await 的地方，因此如果像下面这样弱引用 self，是不能解决内存泄漏问题。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Task</span> &#123; [<span class="keyword">weak</span> <span class="keyword">self</span>] <span class="keyword">in</span></span><br><span class="line">    <span class="keyword">guard</span> <span class="keyword">let</span> <span class="keyword">self</span> = <span class="keyword">self</span> <span class="keyword">else</span> &#123; <span class="keyword">return</span> &#125;</span><br><span class="line">    <span class="keyword">let</span> notifications = <span class="type">NotificationCenter</span>.<span class="keyword">default</span>.notifications(named: <span class="type">UIApplication</span>.didEnterBackgroundNotification)</span><br><span class="line">    <span class="keyword">for</span> await notification <span class="keyword">in</span> notifications &#123;</span><br><span class="line">        <span class="built_in">print</span>(notification)</span><br><span class="line">        <span class="keyword">self</span>.handle()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>虽然通过 weakself 捕获， TestView 此时确实可以正常释放了，但是 Task 本身其实是脱离 TestView 的生命周期存在的，所以代码对 notifications 的监听并没有停止，验证这一点也很简单，我们将打印语句移动一下，就会发现即使 TestView 释放了，打印语句仍然会被执行。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Task</span> &#123; [<span class="keyword">weak</span> <span class="keyword">self</span>] <span class="keyword">in</span></span><br><span class="line">    <span class="keyword">let</span> notifications = <span class="type">NotificationCenter</span>.<span class="keyword">default</span>.notifications(named: <span class="type">UIApplication</span>.didEnterBackgroundNotification)</span><br><span class="line">    <span class="keyword">for</span> await notification <span class="keyword">in</span> notifications &#123;</span><br><span class="line">        <span class="built_in">print</span>(notification)</span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> <span class="keyword">self</span> = <span class="keyword">self</span> <span class="keyword">else</span> &#123; <span class="keyword">return</span> &#125;</span><br><span class="line">        <span class="keyword">self</span>.handle()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>因此正确的思路应该是取消 Task 执行。</p>
-<h2 id="取消-Task"><a href="#取消-Task" class="headerlink" title="取消 Task"></a>取消 Task</h2><p>实际上 Swift Concurrency 并不推荐我们直接初始化一个 Task，因为这样初始化的 Task 是一个独立的根 Task，没有所属的父 Task，也就意味着 Task 的生命周期是独立存在的。Swift Concurrency 建议所有的 Task 都应该形成一个任务树，从而实现结构化编程。</p>
-<blockquote>
-<p>结构化编程：并发操作保证控制流路径的单一入口和单一出口  </p>
-</blockquote>
-<p>所以最合理的方式是这样修复。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TestView</span>: <span class="title">UIView</span> </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> task: <span class="type">Task</span>&lt;<span class="type">Void</span>, <span class="type">Never</span>&gt;?</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">deinit</span> &#123;</span><br><span class="line">        task?.cancel()</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">"deinit"</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">test</span><span class="params">()</span></span> &#123;</span><br><span class="line">        task = <span class="type">Task</span> &#123; [<span class="keyword">weak</span> <span class="keyword">self</span>] <span class="keyword">in</span></span><br><span class="line">            <span class="keyword">let</span> notifications = <span class="type">NotificationCenter</span>.<span class="keyword">default</span>.notifications(named: <span class="type">UIApplication</span>.didEnterBackgroundNotification)</span><br><span class="line">            <span class="keyword">for</span> await notification <span class="keyword">in</span> notifications &#123;</span><br><span class="line">                <span class="keyword">guard</span> <span class="keyword">let</span> <span class="keyword">self</span> = <span class="keyword">self</span> <span class="keyword">else</span> &#123; <span class="keyword">return</span> &#125;</span><br><span class="line">                <span class="built_in">print</span>(notification)</span><br><span class="line">                <span class="keyword">self</span>.handle()</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">	  &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">func</span> <span class="title">handle</span><span class="params">()</span></span> &#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这样，当 TestView 被释放时，对 UIApplication.didEnterBackgroundNotification 的监听也能正常取消。</p>
-<h1 id="相关链接"><a href="#相关链接" class="headerlink" title="相关链接"></a>相关链接</h1><ul>
-<li><a href="https://forums.swift.org/t/why-task-doesnt-need-explicit-use-of-self/58748/6" target="_blank" rel="noopener">Why Task { } doesn’t need explicit use of self? - #6 by AlexSedykh - Using Swift - Swift Forums</a></li>
-<li><a href="https://github.com/apple/swift-evolution/blob/main/proposals/0304-structured-concurrency.md#implicit-self" target="_blank" rel="noopener">swift-evolution/0304-structured-concurrency.md at main · apple/swift-evolution · GitHub</a></li>
-<li><a href="https://forums.swift.org/t/explicit-self-not-required-for-task-closures/54364/19" target="_blank" rel="noopener">Explicit self not required for Task closures? - #19 by kevinc - Using Swift - Swift Forums</a></li>
-<li><a href="https://developer.apple.com/forums/thread/691814" target="_blank" rel="noopener">Swift 5.5 Task { … } weak self | Apple Developer Forums</a></li>
-<li><a href="https://www.swiftwithvincent.com/blog/three-mistakes-to-avoid-with-async-await-in-swift" target="_blank" rel="noopener">3 mistakes to avoid with async / await — Swift with Vincent</a></li>
-<li><a href="https://www.swiftbysundell.com/articles/memory-management-when-using-async-await/" target="_blank" rel="noopener">Memory management when using async/await in Swift | Swift by Sundell</a></li>
-</ul>
-
+          <p>Task 会隐式捕获 self 但没有编译提示，在大部分场景下这种特性并没有问题，但是遇到无限异步序列时容易造成循环引用问题</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2023/04/24/iOS%E5%BC%80%E5%8F%91/Swift%20%E5%B9%B6%E5%8F%91%E4%B8%AD%20Task%20%E9%9A%90%E5%BC%8F%E6%8D%95%E8%8E%B7%20self%20%E7%9A%84%E9%97%AE%E9%A2%98/">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -1167,7 +1048,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

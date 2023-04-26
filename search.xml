@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>iOS开发/Swift 中的 some 和 any 关键字</title>
-    <url>/2023/04/25/iOS%E5%BC%80%E5%8F%91/Swift%20%E4%B8%AD%E7%9A%84%20some%20%E5%92%8C%20any%20%E5%85%B3%E9%94%AE%E5%AD%97/</url>
-    <content><![CDATA[<hr>
-<p>title: Swift 中的 some 和 any 关键字<br>date: 2023-04-26<br>category: iOS开发<br>description: “some 代表了不透明类型（opaque type），any 代表存在类型（existential type）”<br>tags:  [Swift]</p>
-<hr>
-<p>从定义出发，some 代表了不透明类型（opaque type），而 any 代表存在类型（existential type）。</p>
+    <title>Swift 中的 some 和 any 关键字</title>
+    <url>/2023/04/26/iOS%E5%BC%80%E5%8F%91/Swift%20%E4%B8%AD%E7%9A%84%20some%20%E5%92%8C%20any%20%E5%85%B3%E9%94%AE%E5%AD%97/</url>
+    <content><![CDATA[<p>从定义出发，some 代表了不透明类型（opaque type），而 any 代表存在类型（existential type）。</p>
 <p>如果用一句概括的话，some 代表存在某个具体类型，这个具体类型遵循了某种协议的约束，并且这个具体类型是可以在编译期确定的，而 any 代表任意一种满足某种协议约束的类型，但这个类型具体是什么，必须要在运行时才能确定。</p>
 <h1 id="some-关键字"><a href="#some-关键字" class="headerlink" title="some 关键字"></a>some 关键字</h1><p>some 关键字是在 Swift 5.1 跟随 SwiftUI 的发布出现的，我们最常见到的 some 的使用如下所示</p>
 <figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> body: some <span class="type">View</span> &#123;</span><br><span class="line">    ···       </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -101,14 +98,17 @@
 <li><a href="https://juejin.cn/post/6993316954916257822" target="_blank" rel="noopener">【Swift-不透明类型】从SwiftUI看some关键字 - 掘金</a></li>
 </ul>
 ]]></content>
+      <categories>
+        <category>iOS开发</category>
+      </categories>
+      <tags>
+        <tag>Swift</tag>
+      </tags>
   </entry>
   <entry>
-    <title>iOS开发/Swift 并发中 Task 隐式捕获 self 的问题</title>
+    <title>Swift 并发中 Task 隐式捕获 self 的问题</title>
     <url>/2023/04/24/iOS%E5%BC%80%E5%8F%91/Swift%20%E5%B9%B6%E5%8F%91%E4%B8%AD%20Task%20%E9%9A%90%E5%BC%8F%E6%8D%95%E8%8E%B7%20self%20%E7%9A%84%E9%97%AE%E9%A2%98/</url>
-    <content><![CDATA[<hr>
-<p>title: Swift 并发中 Task 隐式捕获 self 的问题<br>date: 2023-04-24<br>category: iOS开发<br>description: “Task 会隐式捕获 self 但没有编译提示，在大部分场景下这种特性并没有问题，但是遇到无限异步序列时容易造成循环引用问题”<br>tags:  [Swift, Swift 并发]</p>
-<hr>
-<h1 id="隐式捕获"><a href="#隐式捕获" class="headerlink" title="隐式捕获"></a>隐式捕获</h1><p>Swift Concurrency 的 Task 有两个常用的初始化方法</p>
+    <content><![CDATA[<h1 id="隐式捕获"><a href="#隐式捕获" class="headerlink" title="隐式捕获"></a>隐式捕获</h1><p>Swift Concurrency 的 Task 有两个常用的初始化方法</p>
 <figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">init</span>(priority: <span class="type">TaskPriority?</span> = <span class="literal">nil</span>, operation: @escaping @<span class="type">Sendable</span> () async -&gt; <span class="type">Success</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">func</span> <span class="title">detached</span><span class="params">(priority: TaskPriority? = <span class="literal">nil</span>, operation: @escaping @Sendable <span class="params">()</span></span></span> async -&gt; <span class="type">Success</span>) -&gt; <span class="type">Task</span>&lt;<span class="type">Success</span>, <span class="type">Failure</span>&gt;</span><br></pre></td></tr></table></figure>
 
 <p>可以看到，两个方法的 <code>operation</code> 参数都是用 @escaping 修饰的，意味着 operation 是一个逃逸闭包，逃逸闭包会在声明后延长生命周期再执行，因此如果在一个类当中使用 Task，Task 内部又调用了类的方法，就会造成对 self 的隐式捕获。</p>
@@ -166,6 +166,13 @@
 <li><a href="https://www.swiftbysundell.com/articles/memory-management-when-using-async-await/" target="_blank" rel="noopener">Memory management when using async/await in Swift | Swift by Sundell</a></li>
 </ul>
 ]]></content>
+      <categories>
+        <category>iOS开发</category>
+      </categories>
+      <tags>
+        <tag>Swift</tag>
+        <tag>Swift 并发</tag>
+      </tags>
   </entry>
   <entry>
     <title>关于美的本能——《乔布斯传》</title>
